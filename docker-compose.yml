@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n_app
+    restart: always
+    ports:
+      - "${N8N_PORT}:5678"
+    environment:
+      #- N8N_HOST=${N8N_HOST}
+      #- N8N_PORT=${N8N_PORT}
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
+      - N8N_SECURE_COOKIE=false
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - NODE_ENV=production
+      - GENERIC_TIMEZONE=${TIME_ZONE} 
+      - N8N_EDITOR_BASE_URL=http://${N8N_HOST}:${N8N_PORT}  
+      #- N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - DB_TYPE=mysqldb
+      - DB_MYSQLDB_HOST=db
+      - DB_MYSQLDB_PORT=${MYSQL_PORT}
+      - DB_MYSQLDB_DATABASE=${MYSQL_DATABASE}
+      - DB_MYSQLDB_USER=${MYSQL_USER}
+      - DB_MYSQLDB_PASSWORD=${MYSQL_PASSWORD}
+      # SMTP Configuration
+      - N8N_EMAIL_MODE=smtp
+      - N8N_SMTP_HOST=${SMTP_HOST}
+      - N8N_SMTP_PORT=${SMTP_PORT}
+      - N8N_SMTP_USER=${SMTP_USER}
+      - N8N_SMTP_PASS=${SMTP_PASSWORD}
+      - N8N_SMTP_SENDER=${SMTP_SENDER}
+      - N8N_SMTP_SSL=${SMTP_SSL}
+      # LOG Configuration
+      - N8N_LOG_LEVEL=debug
+      - N8N_LOG_OUTPUT=console,file
+      - N8N_LOG_FILE_LOCATION=/home/node/.n8n/logs/n8n.log
+      - N8N_LOG_FILE_MAXSIZE=50
+      - N8N_LOG_FILE_MAXCOUNT=60
+    volumes:
+      - ${N8N_DATA}:/home/node/.n8n
+    depends_on:
+      - db
+    networks:
+      - n8n-network
+
+  db:
+    image: mysql:8.0
+    restart: always
+    container_name: n8n_db
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ${MYSQL_DATA}:/var/lib/mysql
+    ports:
+      - ${MYSQL_PORT}:3306
+    networks:
+      - n8n-network
+
+networks:
+  n8n-network:
+    driver: bridge

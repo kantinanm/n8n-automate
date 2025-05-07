@@ -1,0 +1,7 @@
+**/*.bak
+*.bak
+.env
+
+
+n8n_data/**
+db_data/**

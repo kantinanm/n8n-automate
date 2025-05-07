@@ -1,0 +1,7 @@
+.git
+.env
+*.md
+data/
+db_data/.*
+n8n_data/.*
+node_modules/
